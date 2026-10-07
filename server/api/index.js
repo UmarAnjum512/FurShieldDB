@@ -1,6 +1,6 @@
 import "dotenv/config";
 import mongoose from "mongoose";
-import app from "../src/app.js";
+import app, { corsMiddleware } from "../src/app.js";
 import { connectDB } from "../src/config/db.js";
 
 // Vercel serverless functions can reuse a "warm" container between calls,
@@ -18,8 +18,15 @@ export default async function handler(req, res) {
     try {
       await connectionPromise;
     } catch (err) {
-      res.status(500).json({ success: false, message: "Database connection failed" });
-      return;
+      console.error("DB connection failed:", err.message);
+      // Run CORS first so the browser shows the real error instead of a confusing CORS failure.
+      return corsMiddleware(req, res, () =>
+        res.status(500).json({
+          success: false,
+          message: "Database connection failed",
+          reason: err.message,
+        })
+      );
     }
   }
 

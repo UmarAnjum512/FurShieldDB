@@ -47,7 +47,7 @@ const allowedOrigins = [
   .map((o) => o.trim().replace(/\/$/, ""))
   .filter(Boolean);
 
-app.use(
+export const corsMiddleware =
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true); // non-browser requests (curl, Postman, health checks)
@@ -68,8 +68,8 @@ app.use(
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
-  })
-);
+  });
+app.use(corsMiddleware);
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
